@@ -1,0 +1,68 @@
+1、聊天服务器提供获取聊天服务器地址、封号、禁言、推送系统消息、重新加载配置等API；
+2、url前缀为：http://{domain}/API/,其中domain可能为chat.xh.github.com/Jordanzuo，依项目的不同而不同；
+3、每个url的后缀都是不同的
+4、返回结果是一个JSON字符串，其中的Code=0表示成功，否则表示失败；如果失败可以显示Message字段，以便于发现问题所在
+
+/// 封号
+static void TestForbid()
+{
+    String forbidUrl = "http://{domain}/API/forbid";
+
+    String playerId = "00957233-b685-4ca0-909e-ec652885a194";
+    Int32 type = 0; //(0:查看封号状态 1:封号 2:解封)
+    String postData = String.Format("PlayerId={0}&Type={1}", playerId, type);
+
+    String resultStr = WebUtil.PostWebData(forbidUrl, postData, DataCompress.NotCompress);
+    Dictionary<string, object> resultObj = JsonUtil.Deserialize(resultStr);
+
+    //Data：
+    如果type=0，则Data表示是否已经封号(bool型)
+    如果type!=0，则Data为空
+}
+
+/// 禁言
+static void TestSilent()
+{
+    String silentUrl = "http://{domain}/API/silent";
+
+    String playerId = "00957233-b685-4ca0-909e-ec652885a194";
+    Int32 type = 0; //(0:查看禁言状态 1:禁言 2:解禁)
+    Int32 duration = 30; //禁言的分钟数
+    String postData = String.Format("PlayerId={0}&Type={1}&Duration={2}", playerId, type, duration);
+
+    String resultStr = WebUtil.PostWebData(silentUrl, postData, DataCompress.NotCompress);
+    Dictionary<string, object> resultObj = JsonUtil.Deserialize(resultStr);
+
+    //Data：
+    如果type=0，data["Status"]表示是否被禁言(bool型)；如果被禁言data["LeftMinutes"]表示禁言剩余的分钟数
+    如果type!=0，则Data为空
+}
+
+/// 推送系统消息
+static void TestPush()
+{
+    String pushUrl = "http://{domain}/API/push";
+
+    Int32 serverGroupIds = "10001,10002"（0表示向所有服推送，否则使用,分隔所需要推送的服务器组）
+    String message = "大家好，我们将于20:50—21:15进行一次更新维护，本次更新主要修复一些已知问题，并为春节的到来做准备，更新完毕后即可正常登录，祝大家游戏愉快！";
+    String playerIds = "";//如果有多个玩家Id用,分隔，否则为空字符串
+    String unionId = "";//如果有公会则为公会Id，否则为空字符串
+    
+    String postData = String.Format("ServerGroupIds={0}&Message={1}&PlayerIds={2}&UnionId={3}", serverGroupIds, message, playerIds, unionId);
+
+    String resultStr = WebUtil.PostWebData(pushUrl, postData, DataCompress.NotCompress);
+    Dictionary<string, object> resultObj = JsonUtil.Deserialize(resultStr);
+
+    //Data：无
+}
+
+/// 重新加载配置
+static void TestReload()
+{
+    String pushUrl = "http://{domain}/API/reload";
+   
+    String resultStr = WebUtil.PostWebData(pushUrl, "", DataCompress.NotCompress);
+    Dictionary<string, object> resultObj = JsonUtil.Deserialize(resultStr);       
+
+    //Data：无   
+}

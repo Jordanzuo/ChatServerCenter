@@ -1,0 +1,161 @@
+一、聊天频道定义
+type ChannelType int
+
+// 系统频道
+System ChannelType = 0
+
+// 世界频道
+World ChannelType = 1
+
+// 公会频道
+Union ChannelType = 2
+
+// 私聊频道
+Private ChannelType = 3
+
+// Avatar频道，用于游戏服务器通知客户端
+Avatar ChannelType = 4
+
+// 跨服频道，用于跨服聊天
+CrossServer ChannelType = 5
+
+二、命令类型定义
+type CommandType int
+
+// 登陆
+Login CommandType = 1
+
+// 登出
+Logout CommandType = 2
+
+// 发送消息
+SendMessage CommandType = 3
+
+// 更新玩家信息
+UpdatePlayerInfo CommandType = 4
+
+三、请求参数定义（JSON字符串）
+CommandType：命令类型(CommandType类型）
+Command：命令内容（json字符串）
+
+Command内容定义：
+Login:
+Id：玩家Id(string)
+Name：玩家名称(string)
+UnionId：公会Id(string)
+ExtraMsg：额外信息(string)
+Sign：签名=md5("id-name-LoginKey)(string)
+PartnerId：合作商Id(int)
+ServerId： 服务器Id(int)
+
+Logout:
+无
+
+SendMessage:
+ChannelType:聊天频道(ChannelType) 
+Message：发送的消息内容(string)
+ToPlayerId：私聊的目标玩家Id(string)
+
+UpdatePlayerInfo:
+Name：玩家名称(string)
+UnionId：公会Id(string)
+ExtraMsg：额外信息(string)
+
+三、返回类型定义
+type ResponseObject struct {
+	// 响应结果的状态值
+	Code int
+
+	// 响应结果的状态值所对应的描述信息
+	Message string
+
+	// 响应结果的数据
+	Data interface{}
+
+	// 响应结果对应的请求命令类型
+	CommandType CommandType
+}
+
+四、响应结果的状态值Code、及对应的描述信息Message定义
+// 成功
+0:"Success"
+
+// 数据错误
+-1:"DataError"
+
+// API数据错误
+-2:"APIDataError"
+
+// 客户端数据错误
+-3:"ClientDataError"
+
+// 命令类型未定义
+-4:"CommandTypeNotDefined"
+
+// 签名错误
+-5:"SignError"
+
+// 尚未登陆
+-6:"NoLogin"
+
+// 不在公会中
+-7:"NotInUnion"
+
+// 未找到目标
+-8:"NotFoundTarget"
+
+// 不能给自己发消息
+-9:"CantSendMessageToSelf"
+
+// 玩家不存在
+-10:"PlayerNotExist"
+
+// 玩家被封号
+-11:"PlayerIsForbidden"
+
+// 玩家被禁言
+-12:"PlayerIsInSilent"
+
+// 只支持POST
+-13:"OnlySupportPOST"
+
+// API未定义
+-14:"APINotDefined"
+
+// 在另一台设备上登录
+-15:"LoginOnAnotherDevice"
+
+// 名称错误
+-16:"NameError"
+
+// 公会Id错误
+-17:"UnionIdError"
+
+// 含有屏蔽词语
+-18:"ContainForbiddenWord"
+
+//参数为空
+-19:"ParamIsEmpty"
+
+//参数不匹配
+-20:"ParamNotMatch"
+
+// 服务器组不存在
+-21:"ServerGroupNotExist"
+
+// 不能发送跨服消息
+-22:"CantSendCrossServerMessage"
+
+其中当返回值为：PlayerIsForbidden、LoginOnAnotherDevice时客户端应该主动断开连接，而不要再进行自动重连
+
+
+五、响应结果的数据Data的定义
+type ResponseData struct {
+	ChannelType ChannelType                             // 聊天频道
+	Message     string                                  // 聊天消息
+	From        *Player          `json:"From,omitempty"`// 发送人
+	To          *Player          `json:"To,omitempty"`  // 接收人
+}
+其中：
+当ChannelType=System、World、Union、Private、CrossServer等频道时，Message为可以直接显示的字符串
+当ChannelType=Avatar时，Message为服务器和客户端共同定义的复杂json字符串
